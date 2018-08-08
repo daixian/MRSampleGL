@@ -1,0 +1,112 @@
+﻿//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ 生成的包含文件。
+//
+#define IDC_MYICON                      2
+#define IDD_OGLSTUDY_DIALOG             102
+#define IDS_APP_TITLE                   103
+#define IDD_ABOUTBOX                    103
+#define IDM_ABOUT                       104
+#define IDM_EXIT                        105
+#define IDI_OGLMRDEMO                   107
+#define IDI_SMALL                       108
+#define IDC_OGLMRDEMO                   109
+#define IDR_MAINFRAME                   128
+#define IDD_MRSYS                       129
+#define IDD_MRSYSTEM                    129
+#define IDD_FORMVIEW                    201
+#define IDT_TIMER                       201
+#define IDD_ABOUT                       202
+#define IDB_BITMAP_SONGHO               203
+#define IDI_ICON1                       206
+#define IDC_M_V_13                      1030
+#define IDC_M_V_14                      1031
+#define IDC_M_V_15                      1032
+#define IDC_M_M_0                       1033
+#define IDC_M_M_1                       1034
+#define IDC_M_M_2                       1035
+#define IDC_M_M_3                       1036
+#define IDC_M_M_4                       1037
+#define IDC_M_M_5                       1038
+#define IDC_M_M_6                       1039
+#define IDC_M_M_7                       1040
+#define IDC_M_M_8                       1041
+#define IDC_M_M_9                       1042
+#define IDC_M_M_10                      1043
+#define IDC_M_M_11                      1044
+#define IDC_M_M_12                      1045
+#define IDC_M_M_13                      1046
+#define IDC_M_M_14                      1047
+#define IDC_M_M_15                      1048
+#define IDC_BUTTON_VIEW_VRMODE          1057
+#define IDC_BUTTON_MODEL_RESET          1070
+#define IDC_SLIDER_VIEW_PX              1078
+#define IDC_SLIDER_VIEW_PY              1079
+#define IDC_SLIDER_VIEW_PZ              1080
+#define IDC_SLIDER_VIEW_RX              1081
+#define IDC_SLIDER_VIEW_RY              1082
+#define IDC_SLIDER_VIEW_RZ              1083
+#define IDC_LABEL_VIEW_PX               1084
+#define IDC_LABEL_VIEW_PY               1085
+#define IDC_LABEL_VIEW_PZ               1086
+#define IDC_LABEL_VIEW_RX               1087
+#define IDC_LABEL_VIEW_RY               1088
+#define IDC_LABEL_VIEW_RZ               1089
+#define IDC_SLIDER_MODEL_PX             1090
+#define IDC_SLIDER_MODEL_PY             1091
+#define IDC_SLIDER_MODEL_PZ             1092
+#define IDC_SLIDER_MODEL_RX             1093
+#define IDC_SLIDER_MODEL_RY             1094
+#define IDC_SLIDER_MODEL_RZ             1095
+#define IDC_LABEL_MODEL_PX              1096
+#define IDC_LABEL_MODEL_PY              1097
+#define IDC_LABEL_MODEL_PZ              1098
+#define IDC_LABEL_MODEL_RX              1099
+#define IDC_LABEL_MODEL_RY              1100
+#define IDC_LABEL_MODEL_RZ              1101
+#define IDC_LABEL_VIEW_GL               1102
+#define IDC_LABEL_MODEL_GL              1103
+#define IDC_OK                          1104
+#define IDC_SYSLINK1                    1107
+#define IDC_BUTTON_ABOUT                1108
+#define IDC_M_MV_0                      2001
+#define IDC_M_MV_1                      2002
+#define IDC_M_MV_2                      2003
+#define IDC_M_MV_3                      2004
+#define IDC_M_MV_4                      2005
+#define IDC_M_MV_5                      2006
+#define IDC_M_MV_6                      2007
+#define IDC_M_MV_7                      2008
+#define IDC_M_MV_8                      2009
+#define IDC_M_MV_9                      2010
+#define IDC_M_MV_10                     2011
+#define IDC_M_MV_11                     2012
+#define IDC_M_MV_12                     2013
+#define IDC_M_MV_13                     2014
+#define IDC_M_MV_14                     2015
+#define IDC_M_MV_15                     2016
+#define IDC_M_V_0                       2017
+#define IDC_M_V_1                       2018
+#define IDC_M_V_2                       2019
+#define IDC_M_V_3                       2020
+#define IDC_M_V_4                       2021
+#define IDC_M_V_5                       2022
+#define IDC_M_V_6                       2023
+#define IDC_M_V_7                       2024
+#define IDC_M_V_8                       2025
+#define IDC_M_V_9                       2026
+#define IDC_M_V_10                      2027
+#define IDC_M_V_11                      2028
+#define IDC_M_V_12                      2029
+#define IDC_STATIC                      -1
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NO_MFC                     1
+#define _APS_NEXT_RESOURCE_VALUE        130
+#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_SYMED_VALUE           110
+#endif
+#endif
