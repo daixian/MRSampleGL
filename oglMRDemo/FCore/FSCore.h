@@ -34,13 +34,47 @@ namespace f3d
     };
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary> A matrix 4. </summary>
+    /// <summary> A matrix 4. 
+    ///         是竖着记录到数组中的.
+    ///         | m0  m4  m8  m12 |
+    ///         | m1  m5  m9  m13 |
+    ///         | m2  m6  m10 m14 |
+    ///         | m3  m7  m11 m15 |</summary>
     ///
     /// <remarks> Dx, 2018/8/8. </remarks>
     ///-------------------------------------------------------------------------------------------------
     struct Matrix4
     {
         float m[16];
+    };
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// 输入ModelView矩阵(或view矩阵)和Projection矩阵，同时定义了屏幕距离和屏幕的高度之后返回的计算结果.
+    /// </summary>
+    ///
+    /// <remarks> Dx, 2018/8/15. </remarks>
+    ///-------------------------------------------------------------------------------------------------
+    struct FrustumData
+    {
+        //左眼相机View矩阵
+        f3d::Matrix4 matViewL;
+        //右眼相机View矩阵
+        f3d::Matrix4 matViewR;
+
+        //左眼Projection矩阵
+        f3d::Matrix4 matProjectionL;
+        //右眼Projection矩阵
+        f3d::Matrix4 matProjectionR;
+
+        //笔尖的坐标，分别在设置上面相机的ModelView之后应该能够正确渲染。
+        //如左眼图像画笔首先使用上面的View矩阵设置GL_MODELVIEW：
+        // glMatrixMode(GL_MODELVIEW); 
+        // glLoadMatrixf(fd.matViewL.m);
+        // 使用这个坐标来画线即可
+        f3d::Vector3 penPosition;
+        //笔尖的方向向量
+        f3d::Vector3 penDirection;
     };
 }
 
@@ -291,3 +325,24 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getMCDevID();
 /// <returns> Error code. </returns>
 ///-------------------------------------------------------------------------------------------------
 extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
+extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR2(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
+
+///-------------------------------------------------------------------------------------------------
+/// <summary>
+/// 修改渲染使用的一些矩阵参数.这个函数只支持左手系的一种特定情形和右手系的一种特定情形.
+/// </summary>
+///
+/// <remarks> Dx, 2018/8/15. </remarks>
+///
+/// <param name="frustumData">    [out]输出结果. </param>
+/// <param name="matView">        [in]原来的视图矩阵. </param>
+/// <param name="matProjection">  [in]原来的投影矩阵. </param>
+/// <param name="screenDistance"> 相机到假想屏幕距离（相机空间）. </param>
+/// <param name="screenHeight">   假想屏幕的高度（相机空间）. </param>
+/// <param name="pupilDistance">  两眼瞳距(现实空间中的瞳距)，默认6.6cm. </param>
+/// <param name="isLeftHanded">   是否是左手坐标系. </param>
+///
+/// <returns> Error Code. </returns>
+///-------------------------------------------------------------------------------------------------
+extern "C" FSCORE_EXPORT int __stdcall f3drm_modifyFrustum(f3d::FrustumData * frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
+    float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded);

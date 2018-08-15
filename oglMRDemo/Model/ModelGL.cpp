@@ -335,7 +335,7 @@ void ModelGL::draw()
 {
     f3drm_setActiveUser();//标记活动用户
 
-    setVRCamera();//设置vr相机的数据
+    //setVRCamera();//设置vr相机的数据
 
     if (!isVRMode)
     {
@@ -346,6 +346,7 @@ void ModelGL::draw()
         drawVR();//vr模式下的绘制
     }
 }
+
 
 void ModelGL::drawDebug()
 {
@@ -385,16 +386,21 @@ void ModelGL::drawDebug()
 
 void ModelGL::drawVR()
 {
-    f3d::Matrix4 matrixL;
-    f3d::Matrix4 matrixR;
-    f3drm_getFrustumLR(&matrixL, &matrixR, 1, 100);
+ 
+    //设置一个常规的渲染视口
+    setViewportSub(0, 0, windowWidth, windowHeight, NEAR_PLANE, FAR_PLANE);
+
+    f3d::FrustumData fd;//变换结果结构体
+    f3d::Matrix4 proj;
+    glGetFloatv(GL_PROJECTION_MATRIX, proj.m);//得到当前投影矩阵
+    f3drm_modifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
 
     //画左半边图像
     glViewport(0, 0, windowWidth/2, windowHeight);
     glScissor(0, 0, windowWidth/2, windowHeight);
 
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(matrixL.m);
+    glLoadMatrixf(fd.matProjectionL.m);//设置左眼投影
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -403,12 +409,25 @@ void ModelGL::drawVR()
 
     glPushMatrix();
 
-    glLoadMatrixf(matrixViewL.get());
+    glLoadMatrixf(fd.matViewL.m);//设置左眼View矩阵，为了画线
 
     drawScreen();
     drawGrid(10, 1);
-    drawPen();
-    glLoadMatrixf(matrixModelViewL.get());
+
+    //画线
+    glDisable(GL_LIGHTING);
+    glBegin(GL_LINES);
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glVertex3f(fd.penPosition.x, fd.penPosition.y, fd.penPosition.z);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(fd.penPosition.x + fd.penDirection.x, fd.penPosition.y + fd.penDirection.y, fd.penPosition.z + fd.penDirection.z);
+    glEnd();
+    glEnable(GL_LIGHTING);
+
+    Matrix4 mat;
+    mat.set(fd.matViewL.m);//画茶壶
+    Matrix4 matMV = mat * matrixModel;
+    glLoadMatrixf(matMV.get());
     drawAxis(4);
     if (glslReady)
     {
@@ -429,7 +448,7 @@ void ModelGL::drawVR()
     glScissor(windowWidth / 2, 0, windowWidth / 2, windowHeight);
 
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(matrixR.m);
+    glLoadMatrixf(fd.matProjectionR.m);//设置右眼投影
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -438,12 +457,24 @@ void ModelGL::drawVR()
 
     glPushMatrix();
 
-    glLoadMatrixf(matrixViewR.get());
+    glLoadMatrixf(fd.matViewR.m);//设置右眼View矩阵，为了画线
 
     drawScreen();
     drawGrid(10, 1);
-    drawPen();
-    glLoadMatrixf(matrixModelViewR.get());
+ 
+    //画线
+    glDisable(GL_LIGHTING);
+    glBegin(GL_LINES);
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glVertex3f(fd.penPosition.x, fd.penPosition.y, fd.penPosition.z);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(fd.penPosition.x + fd.penDirection.x, fd.penPosition.y + fd.penDirection.y, fd.penPosition.z + fd.penDirection.z);
+    glEnd();
+    glEnable(GL_LIGHTING);
+
+    mat.set(fd.matViewR.m);//画茶壶
+    matMV = mat * matrixModel;
+    glLoadMatrixf(matMV.get());
     drawAxis(4);
     if (glslReady)
     {
@@ -466,10 +497,7 @@ void ModelGL::drawVR()
 ///////////////////////////////////////////////////////////////////////////////
 void ModelGL::drawSub1()
 {
-    f3d::Matrix4 matrixL;
-    f3d::Matrix4 matrixR;
-    f3drm_getFrustumLR(&matrixL, &matrixR, 1, 100);
-
+    setViewportSub(0, 0, windowWidth, windowHeight, 1, 30);
     glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -486,10 +514,32 @@ void ModelGL::drawSub1()
     glViewport(x, y, w, h);
     glScissor(x, y, w, h);
 
+
+    f3d::FrustumData fd;//变换结果结构体
+    f3d::Matrix4 proj;
+    glGetFloatv(GL_PROJECTION_MATRIX, proj.m);//得到当前原来的老程序投影矩阵
+    f3drm_modifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
+
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(matrixL.m);
+    glLoadMatrixf(fd.matProjectionL.m);//设置左眼的非标准投影
+
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glLoadMatrixf(fd.matViewL.m);//设置左眼的GL_MODELVIEW，等于当前在世界空间，此时下面接画笔的射线代码
+   
+    //画笔的射线
+    glDisable(GL_LIGHTING);
+    glBegin(GL_LINES);
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glVertex3f(fd.penPosition.x, fd.penPosition.y, fd.penPosition.z);//笔尖坐标
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(fd.penPosition.x + fd.penDirection.x, fd.penPosition.y + fd.penDirection.y, fd.penPosition.z + fd.penDirection.z);
+    glEnd();
+    glEnable(GL_LIGHTING);
+
+
+
+
+    //glLoadIdentity();
 
     // clear buffer (square area)
     glClearColor(0.2f, 0.2f, 0.2f, 1);
@@ -506,13 +556,21 @@ void ModelGL::drawSub1()
     //    glRotatef(-cameraAngle[1], 0, 1, 0); // heading (Y)
     //    glRotatef(-cameraAngle[0], 1, 0, 0); // pitch (X)
     //    glTranslatef(-cameraPosition[0], -cameraPosition[1], -cameraPosition[2]);
-    glLoadMatrixf(matrixView.get());
+    //glLoadMatrixf(matrixView.get());
 
     // always draw the grid at the origin (before any modeling transform)
     drawGrid(10, 1);
 
     drawScreen();
-    drawPen();
+ 
+    glDisable(GL_LIGHTING);
+    glBegin(GL_LINES);
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glVertex3f(fd.penPosition.x, fd.penPosition.y, fd.penPosition.z);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(fd.penPosition.x + fd.penDirection.x, fd.penPosition.y + fd.penDirection.y, fd.penPosition.z + fd.penDirection.z);
+    glEnd();
+    glEnable(GL_LIGHTING);
 
     // transform objects ======================================================
     // From now, all transform will be for modeling matrix only.
@@ -529,8 +587,11 @@ void ModelGL::drawSub1()
     // before drawing the object:
     // ModelView_M = View_M * Model_M
     // This modelview matrix transforms the objects from object space to eye space.
-    glLoadMatrixf(matrixModelView.get());
-
+    Matrix4 mat;
+    mat.set(fd.matViewL.m);//画茶壶
+    Matrix4 matMV = mat * matrixModel;
+    glLoadMatrixf(matMV.get());
+   
     // draw a teapot and axis after ModelView transform
     // v' = Mmv * v
     drawAxis(4);
@@ -657,7 +718,8 @@ void ModelGL::setVRCamera()
 { 
     f3d::Vector3 pos = f3drm_getGlassPosition();//眼镜是非标准投影，只需要坐标即可
     //调整坐标系
-    pos.z = -pos.z;//z轴反过来
+    //pos.z = -pos.z;//z轴反过来
+    // 
     Vector3 v3Pos(pos.x, pos.y, pos.z);//换成这个V3好计算
     v3Pos = v3Pos * k;//整个坐标系放大30倍
 
@@ -679,8 +741,8 @@ void ModelGL::drawPen()
     f3d::Vector3 dir = f3drm_getPenDirection();
 
     //调整坐标系
-    pos.z = -pos.z;//z轴反过来
-    dir.z = -dir.z;//z轴反过来
+    //pos.z = -pos.z;//z轴反过来
+    //dir.z = -dir.z;//z轴反过来
 
     Vector3 v3Pos(pos.x, pos.y, pos.z);//换成这个V3好计算
     Vector3 v3Dir(dir.x, dir.y, dir.z);
