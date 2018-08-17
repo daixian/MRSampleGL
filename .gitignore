@@ -218,3 +218,7 @@ FakesAssemblies/
 _Pvt_Extensions
 
 oglMRDemo/log\.txt
+
+UnityMatrixTest/Library/
+
+UnityMatrixTest/Temp/

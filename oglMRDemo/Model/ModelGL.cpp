@@ -328,6 +328,86 @@ void ModelGL::setViewportSub(int x, int y, int width, int height, float nearPlan
     glLoadIdentity();
 }
 
+//实验函数
+void modifyFrustumDebug(f3d::FrustumData * frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
+    float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded, f3d::Vector3 glassPosition, f3d::Vector3 penP, f3d::Vector3 penD)
+{
+    int lrCooSys = 1;//如果是左手系=1，那么检测结果不用逆转z轴
+    if (isLeftHanded != true)
+    {
+        lrCooSys = -1;
+    }
+
+    memcpy(frustumData->matProjectionL.m, matProjection->m, sizeof(float) * 16);//拷贝这16个float
+    memcpy(frustumData->matProjectionR.m, matProjection->m, sizeof(float) * 16);//拷贝这16个float
+
+    Matrix4 matViewOri;
+    matViewOri.set(matView->m);
+
+    float scH = screenHeight / 2;
+    float scW = screenHeight / 2 / 9 * 16;
+    float scK = screenHeight / 0.30f;//整个系统尺寸的缩放比例
+
+    f3d::Vector3 pos = glassPosition;//眼镜是非标准投影，只需要坐标即可
+
+    pos.x -= pupilDistance / 2; //左眼偏移
+
+    Matrix4 matrixV_C;//屏幕空间
+
+    Matrix4 matMoveDis;
+    matMoveDis.identity();
+    matMoveDis.translate(0, 0, -screenDistance);
+    matrixV_C = matMoveDis * matViewOri;
+
+    Matrix4 matrixV_L;//左眼相机空间
+    Matrix4 matMoveL;
+    matMoveL.identity();
+    matMoveL.translate(-pos.x*scK, -pos.y*scK, lrCooSys *(-pos.z*scK));//检测结果是左手系，z轴是反的
+    matrixV_L = matMoveL * matrixV_C;
+    memcpy(frustumData->matViewL.m, matrixV_L.get(), sizeof(float) * 16);//拷贝这16个float
+
+    Matrix4 matrixSysView_L;
+    matrixSysView_L.identity();
+    matrixSysView_L.translate(-pos.x, -pos.y, lrCooSys *(-pos.z));//检测结果是左手系，z轴是反的
+
+    pos.x += pupilDistance;//右眼偏移
+    Matrix4 matrixV_R;
+    Matrix4 matMoveR;
+    matMoveR.identity();
+    matMoveR.translate(-pos.x*scK, -pos.y*scK, lrCooSys *(-pos.z*scK));//检测结果是左手系，z轴是反的
+    matrixV_R = matMoveR * matrixV_C;
+    memcpy(frustumData->matViewR.m, matrixV_R.get(), sizeof(float) * 16);//拷贝这16个float
+
+    Matrix4 matrixSysView_R;
+    matrixSysView_R.identity();
+    matrixSysView_R.translate(-pos.x, -pos.y, lrCooSys *(-pos.z));//检测结果是左手系，z轴是反的
+
+
+    float s4p[12] = { -0.27f , 0.15f , 0,
+        -0.27f , -0.15f , 0,
+        0.27f , 0.15f , 0,
+        0.27f , -0.15f , 0 };
+    matFun6((f3d::Matrix4*)&matrixSysView_L, s4p, (f3d::Matrix4*)&frustumData->matProjectionL);
+    matFun6((f3d::Matrix4*)&matrixSysView_R, s4p, (f3d::Matrix4*)&frustumData->matProjectionR);
+
+    f3d::Vector3 f3d_penPos = f3drm_getPenPosition();
+    f3d::Vector3 f3d_penDir = f3drm_getPenDirection();
+    Vector3 penPos(f3d_penPos.x * scK, f3d_penPos.y* scK, lrCooSys *f3d_penPos.z* scK);//检测结果是左手系，z轴是反的
+    Vector3 penDir(f3d_penDir.x * scK, f3d_penDir.y* scK, lrCooSys *f3d_penDir.z* scK);//检测结果是左手系，z轴是反的
+
+    Vector3 pen1Pos = penPos + penDir;//找到方向点的坐标
+    Matrix4 matrixMV_I = matrixV_C.invert();//求逆
+    Vector3 penPosition = matrixMV_I * penPos;
+    Vector3 pen1Position = matrixMV_I * pen1Pos;
+    Vector3 penDir2 = pen1Position - penPosition;
+
+    memcpy(&frustumData->penPosition, &penPosition, sizeof(Vector3));//拷贝这3个float
+    memcpy(&frustumData->penDirection, &penDir2, sizeof(Vector3));//拷贝这3个float
+}
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // draw 2D/3D scene
 ///////////////////////////////////////////////////////////////////////////////
@@ -336,6 +416,24 @@ void ModelGL::draw()
     f3drm_setActiveUser();//标记活动用户
 
     //setVRCamera();//设置vr相机的数据
+
+    f3d::Matrix4 matView;
+    matView.m[0] = 1; matView.m[4] = 0; matView.m[8] = 0; matView.m[12] = 0;
+    matView.m[1] = 0; matView.m[5] = 1; matView.m[9] = 0; matView.m[13] = 0;
+    matView.m[2] = 0; matView.m[6] = 0; matView.m[10] = 1; matView.m[14] = 10;
+    matView.m[3] = 0; matView.m[7] = 0; matView.m[11] = 0; matView.m[15] = 1;
+
+    f3d::Matrix4 matProjection;
+    matProjection.m[0] = 1.357995; matProjection.m[4] = 0; matProjection.m[8] = 0; matProjection.m[12] = 0;
+    matProjection.m[1] = 0; matProjection.m[5] = 2.414214; matProjection.m[9] = 0; matProjection.m[13] = 0;
+    matProjection.m[2] = 0; matProjection.m[6] = 0; matProjection.m[10] = 3.898305; matProjection.m[14] = -33.330513;
+    matProjection.m[3] = 0; matProjection.m[7] = 0; matProjection.m[11] = 1; matProjection.m[15] = 0;
+
+    f3d::FrustumData frustumData;
+    modifyFrustumDebug(&frustumData, &matView, &matProjection,
+        10,10, 0.066, true, f3d::Vector3{ 0.0f, 0.0f, -0.4f }, f3d::Vector3{ 0.1f, 0.1f, -0.1f }, f3d::Vector3{ 0.0f, 0.0f, -1.0f });
+
+
 
     if (!isVRMode)
     {

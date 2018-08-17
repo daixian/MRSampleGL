@@ -346,3 +346,5 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR2(f3d::Matrix4* matL, f
 ///-------------------------------------------------------------------------------------------------
 extern "C" FSCORE_EXPORT int __stdcall f3drm_modifyFrustum(f3d::FrustumData * frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
     float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded);
+
+extern "C"  FSCORE_EXPORT void __stdcall matFun6(f3d::Matrix4* w2c, float* screen4Point, f3d::Matrix4 *result);
