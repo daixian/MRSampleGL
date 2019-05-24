@@ -114,7 +114,8 @@ ModelGL::ModelGL() : windowWidth(0), windowHeight(0), povWidth(0),
     matrixModelView.identity();
     matrixProjection.identity();
 
-    f3drm_init();
+    //SDK初始化
+    fmInit();
 }
 
 
@@ -328,116 +329,16 @@ void ModelGL::setViewportSub(int x, int y, int width, int height, float nearPlan
     glLoadIdentity();
 }
 
-//实验函数
-void modifyFrustumDebug(f3d::FrustumData * frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
-    float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded, f3d::Vector3 glassPosition, f3d::Vector3 penP, f3d::Vector3 penD)
-{
-    int lrCooSys = 1;//如果是左手系=1，那么检测结果不用逆转z轴
-    if (isLeftHanded != true)
-    {
-        lrCooSys = -1;
-    }
-
-    memcpy(frustumData->matProjectionL.m, matProjection->m, sizeof(float) * 16);//拷贝这16个float
-    memcpy(frustumData->matProjectionR.m, matProjection->m, sizeof(float) * 16);//拷贝这16个float
-
-    Matrix4 matViewOri;
-    matViewOri.set(matView->m);
-
-    float scH = screenHeight / 2;
-    float scW = screenHeight / 2 / 9 * 16;
-    float scK = screenHeight / 0.30f;//整个系统尺寸的缩放比例
-
-    f3d::Vector3 pos = glassPosition;//眼镜是非标准投影，只需要坐标即可
-
-    pos.x -= pupilDistance / 2; //左眼偏移
-
-    Matrix4 matrixV_C;//屏幕空间
-
-    Matrix4 matMoveDis;
-    matMoveDis.identity();
-    matMoveDis.translate(0, 0, -screenDistance);
-    matrixV_C = matMoveDis * matViewOri;
-
-    Matrix4 matrixV_L;//左眼相机空间
-    Matrix4 matMoveL;
-    matMoveL.identity();
-    matMoveL.translate(-pos.x*scK, -pos.y*scK, lrCooSys *(-pos.z*scK));//检测结果是左手系，z轴是反的
-    matrixV_L = matMoveL * matrixV_C;
-    memcpy(frustumData->matViewL.m, matrixV_L.get(), sizeof(float) * 16);//拷贝这16个float
-
-    Matrix4 matrixSysView_L;
-    matrixSysView_L.identity();
-    matrixSysView_L.translate(-pos.x, -pos.y, lrCooSys *(-pos.z));//检测结果是左手系，z轴是反的
-
-    pos.x += pupilDistance;//右眼偏移
-    Matrix4 matrixV_R;
-    Matrix4 matMoveR;
-    matMoveR.identity();
-    matMoveR.translate(-pos.x*scK, -pos.y*scK, lrCooSys *(-pos.z*scK));//检测结果是左手系，z轴是反的
-    matrixV_R = matMoveR * matrixV_C;
-    memcpy(frustumData->matViewR.m, matrixV_R.get(), sizeof(float) * 16);//拷贝这16个float
-
-    Matrix4 matrixSysView_R;
-    matrixSysView_R.identity();
-    matrixSysView_R.translate(-pos.x, -pos.y, lrCooSys *(-pos.z));//检测结果是左手系，z轴是反的
-
-
-    float s4p[12] = { -0.27f , 0.15f , 0,
-        -0.27f , -0.15f , 0,
-        0.27f , 0.15f , 0,
-        0.27f , -0.15f , 0 };
-    matFun6((f3d::Matrix4*)&matrixSysView_L, s4p, (f3d::Matrix4*)&frustumData->matProjectionL);
-    matFun6((f3d::Matrix4*)&matrixSysView_R, s4p, (f3d::Matrix4*)&frustumData->matProjectionR);
-
-    f3d::Vector3 f3d_penPos = f3drm_getPenPosition();
-    f3d::Vector3 f3d_penDir = f3drm_getPenDirection();
-    Vector3 penPos(f3d_penPos.x * scK, f3d_penPos.y* scK, lrCooSys *f3d_penPos.z* scK);//检测结果是左手系，z轴是反的
-    Vector3 penDir(f3d_penDir.x * scK, f3d_penDir.y* scK, lrCooSys *f3d_penDir.z* scK);//检测结果是左手系，z轴是反的
-
-    Vector3 pen1Pos = penPos + penDir;//找到方向点的坐标
-    Matrix4 matrixMV_I = matrixV_C.invert();//求逆
-    Vector3 penPosition = matrixMV_I * penPos;
-    Vector3 pen1Position = matrixMV_I * pen1Pos;
-    Vector3 penDir2 = pen1Position - penPosition;
-
-    memcpy(&frustumData->penPosition, &penPosition, sizeof(Vector3));//拷贝这3个float
-    memcpy(&frustumData->penDirection, &penDir2, sizeof(Vector3));//拷贝这3个float
-}
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // draw 2D/3D scene
 ///////////////////////////////////////////////////////////////////////////////
 void ModelGL::draw()
 {
-    f3drm_setActiveUser();//标记活动用户
-
-    //setVRCamera();//设置vr相机的数据
-
-    f3d::Matrix4 matView;
-    matView.m[0] = 1; matView.m[4] = 0; matView.m[8] = 0; matView.m[12] = 0;
-    matView.m[1] = 0; matView.m[5] = 1; matView.m[9] = 0; matView.m[13] = 0;
-    matView.m[2] = 0; matView.m[6] = 0; matView.m[10] = 1; matView.m[14] = 10;
-    matView.m[3] = 0; matView.m[7] = 0; matView.m[11] = 0; matView.m[15] = 1;
-
-    f3d::Matrix4 matProjection;
-    matProjection.m[0] = 1.357995; matProjection.m[4] = 0; matProjection.m[8] = 0; matProjection.m[12] = 0;
-    matProjection.m[1] = 0; matProjection.m[5] = 2.414214; matProjection.m[9] = 0; matProjection.m[13] = 0;
-    matProjection.m[2] = 0; matProjection.m[6] = 0; matProjection.m[10] = 3.898305; matProjection.m[14] = -33.330513;
-    matProjection.m[3] = 0; matProjection.m[7] = 0; matProjection.m[11] = 1; matProjection.m[15] = 0;
-
-    f3d::FrustumData frustumData;
-    modifyFrustumDebug(&frustumData, &matView, &matProjection,
-        10,10, 0.066, true, f3d::Vector3{ 0.0f, 0.0f, -0.4f }, f3d::Vector3{ 0.1f, 0.1f, -0.1f }, f3d::Vector3{ 0.0f, 0.0f, -1.0f });
-
-
+    fmSetActiveUser();//标记活动用户
 
     if (!isVRMode)
     {
-        drawDebug();//画调试场景
+        drawDebug();//画普通的调试场景(这个全是一般的openGL绘制,可以不管)
     }
     else
     {
@@ -448,8 +349,8 @@ void ModelGL::draw()
 
 void ModelGL::drawDebug()
 {
-    drawSub1();
-    drawSub2();
+    drawSub1();//左边图像
+    drawSub2();//右边图像
 
     // post frame
     if (windowSizeChanged)
@@ -482,16 +383,20 @@ void ModelGL::drawDebug()
     }
 }
 
+//这个是fmModifyFrustum()函数的思路:
+// 首先要根据当前的观察位置去确定一个假想一体机屏幕的位置。
+// 在这个例子中我们设计假想屏幕位置就是世界的中心，这样的观察效果比较好，比较能看到茶壶。
+// 原来我们有一个普通的固定观察相机在（0,0,10），现在就是要在当前观察相机的基础上向正前方推进10，然后设置屏幕高度为10，
+// 这样假想中心就到了我们想设置的位置。
 void ModelGL::drawVR()
 {
- 
     //设置一个常规的渲染视口
     setViewportSub(0, 0, windowWidth, windowHeight, NEAR_PLANE, FAR_PLANE);
 
-    f3d::FrustumData fd;//变换结果结构体
+    f3d::FrustumData fd;//变换结果结构体，结果中有View矩阵和Projection矩阵
     f3d::Matrix4 proj;
     glGetFloatv(GL_PROJECTION_MATRIX, proj.m);//得到当前投影矩阵
-    f3drm_modifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
+    fmModifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
 
     //画左半边图像
     glViewport(0, 0, windowWidth/2, windowHeight);
@@ -559,7 +464,7 @@ void ModelGL::drawVR()
 
     drawScreen();
     drawGrid(10, 1);
- 
+
     //画线
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
@@ -616,14 +521,14 @@ void ModelGL::drawSub1()
     f3d::FrustumData fd;//变换结果结构体
     f3d::Matrix4 proj;
     glGetFloatv(GL_PROJECTION_MATRIX, proj.m);//得到当前原来的老程序投影矩阵
-    f3drm_modifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
+    fmModifyFrustum(&fd, (f3d::Matrix4*)&matrixView, &proj, -10, 10, 0.066, false);//屏幕坐标向前推移10，屏幕高度10
 
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(fd.matProjectionL.m);//设置左眼的非标准投影
 
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(fd.matViewL.m);//设置左眼的GL_MODELVIEW，等于当前在世界空间，此时下面接画笔的射线代码
-   
+
     //画笔的射线
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
@@ -660,7 +565,7 @@ void ModelGL::drawSub1()
     drawGrid(10, 1);
 
     drawScreen();
- 
+
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
     glColor3f(0.9f, 0.9f, 0.9f);
@@ -689,7 +594,7 @@ void ModelGL::drawSub1()
     mat.set(fd.matViewL.m);//画茶壶
     Matrix4 matMV = mat * matrixModel;
     glLoadMatrixf(matMV.get());
-   
+
     // draw a teapot and axis after ModelView transform
     // v' = Mmv * v
     drawAxis(4);
@@ -813,11 +718,11 @@ void ModelGL::drawSub2()
 /// <remarks> Dx, 2018/8/8. </remarks>
 ///-------------------------------------------------------------------------------------------------
 void ModelGL::setVRCamera()
-{ 
-    f3d::Vector3 pos = f3drm_getGlassPosition();//眼镜是非标准投影，只需要坐标即可
+{
+    f3d::Vector3 pos = fmGetGlassPosition();//眼镜是非标准投影，只需要坐标即可
     //调整坐标系
     //pos.z = -pos.z;//z轴反过来
-    // 
+    //
     Vector3 v3Pos(pos.x, pos.y, pos.z);//换成这个V3好计算
     v3Pos = v3Pos * k;//整个坐标系放大30倍
 
@@ -834,13 +739,13 @@ void ModelGL::setVRCamera()
 /// <remarks> Dx, 2018/8/8. </remarks>
 ///-------------------------------------------------------------------------------------------------
 void ModelGL::drawPen()
-{ 
-    f3d::Vector3 pos = f3drm_getPenPosition();
-    f3d::Vector3 dir = f3drm_getPenDirection();
+{
+    f3d::Vector3 pos = fmGetPenPosition();
+    f3d::Vector3 dir = fmGetPenDirection();
 
     //调整坐标系
-    //pos.z = -pos.z;//z轴反过来
-    //dir.z = -dir.z;//z轴反过来
+    pos.z = -pos.z;//z轴反过来
+    dir.z = -dir.z;//z轴反过来
 
     Vector3 v3Pos(pos.x, pos.y, pos.z);//换成这个V3好计算
     Vector3 v3Dir(dir.x, dir.y, dir.z);
@@ -854,7 +759,7 @@ void ModelGL::drawPen()
     glBegin(GL_LINES);
 
     glColor3f(0.9f, 0.9f, 0.9f);
-    glVertex3f(v3Pos.x, v3Pos.y, v3Pos.z);  
+    glVertex3f(v3Pos.x, v3Pos.y, v3Pos.z);
     glVertex3f(v3Pos.x + v3Dir.x, v3Pos.y + v3Dir.y, v3Pos.z + v3Dir.z);
 
     glEnd();

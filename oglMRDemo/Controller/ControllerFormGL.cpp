@@ -20,7 +20,7 @@ INT_PTR CALLBACK aboutDialogProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM
 
 typedef  int(WINAPI *GetDpiForMonitor)(HMONITOR, int, UINT*, UINT*);
 struct AllMONITORINFO
-{ 
+{
     HMONITOR    hMonitor; //显示器的指针
     RECT        rcMonitor;    //显示器的矩形结构
     BOOL        primary;    //是否是主屏
@@ -77,7 +77,7 @@ int ControllerFormGL::command(int id, int command, LPARAM msg)
         if (command == BN_CLICKED)
         {
             model->isVRMode = true;//按下的时候切换到VR模式
-       
+
             //设置窗口无边框
             LONG_PTR Style = ::GetWindowLongPtr(mainWinHandle, GWL_STYLE);
             Style = Style & ~WS_CAPTION &~WS_SYSMENU &~WS_SIZEBOX;
@@ -127,7 +127,7 @@ int ControllerFormGL::command(int id, int command, LPARAM msg)
             //把窗口全屏到副显示器上
             ::SetWindowPos(mainWinHandle, HWND_TOPMOST, startx, starty, width, height, SWP_FRAMECHANGED| SWP_SHOWWINDOW);
 
-            f3drm_setflagVRMode(1);//显示器进入vr模式
+            fmSetflagVRMode(1);//显示器进入vr模式
         }
         break;
 

@@ -29,7 +29,7 @@ int ControllerMain::command(int id, int cmd, LPARAM msg)
 
 int ControllerMain::close()
 {
-    f3drm_setflagVRMode(0);//切回2d
+    fmSetflagVRMode(0);//切回2d
 
     Win::log(""); // blank line
     Win::log("Closing the application...");

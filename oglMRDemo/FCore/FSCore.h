@@ -1,4 +1,6 @@
 ﻿#pragma once
+#ifndef _F3D_FSCORE_H_
+#define _F3D_FSCORE_H_
 
 #if defined FSCORE_EXPORTS
 #define FSCORE_EXPORT __declspec(dllexport)
@@ -7,76 +9,77 @@
 #define FSCORE_EXPORT __declspec(dllimport)
 #endif
 
-namespace f3d
+namespace f3d {
+
+///-------------------------------------------------------------------------------------------------
+/// <summary> A vector 3. </summary>
+///
+/// <remarks> Xian Dai, 2018/1/23. </remarks>
+///-------------------------------------------------------------------------------------------------
+struct Vector3
 {
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary> A vector 3. </summary>
-    ///
-    /// <remarks> Xian Dai, 2018/1/23. </remarks>
-    ///-------------------------------------------------------------------------------------------------
-    struct Vector3
-    {
-        float x;
-        float y;
-        float z;
-    };
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary> A quaternion. </summary>
-    ///
-    /// <remarks> Xian Dai, 2018/1/23. </remarks>
-    ///-------------------------------------------------------------------------------------------------
-    struct Quaternion
-    {
-        float x;
-        float y;
-        float z;
-        float w;
-    };
+    float x;
+    float y;
+    float z;
+};
 
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary> A matrix 4. 
-    ///         是竖着记录到数组中的.
-    ///         | m0  m4  m8  m12 |
-    ///         | m1  m5  m9  m13 |
-    ///         | m2  m6  m10 m14 |
-    ///         | m3  m7  m11 m15 |</summary>
-    ///
-    /// <remarks> Dx, 2018/8/8. </remarks>
-    ///-------------------------------------------------------------------------------------------------
-    struct Matrix4
-    {
-        float m[16];
-    };
+///-------------------------------------------------------------------------------------------------
+/// <summary> A quaternion. </summary>
+///
+/// <remarks> Xian Dai, 2018/1/23. </remarks>
+///-------------------------------------------------------------------------------------------------
+struct Quaternion
+{
+    float x;
+    float y;
+    float z;
+    float w;
+};
 
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>
-    /// 输入ModelView矩阵(或view矩阵)和Projection矩阵，同时定义了屏幕距离和屏幕的高度之后返回的计算结果.
-    /// </summary>
-    ///
-    /// <remarks> Dx, 2018/8/15. </remarks>
-    ///-------------------------------------------------------------------------------------------------
-    struct FrustumData
-    {
-        //左眼相机View矩阵
-        f3d::Matrix4 matViewL;
-        //右眼相机View矩阵
-        f3d::Matrix4 matViewR;
+///-------------------------------------------------------------------------------------------------
+/// <summary> A matrix 4.
+///         是竖着记录到数组中的.
+///         | m0  m4  m8  m12 |
+///         | m1  m5  m9  m13 |
+///         | m2  m6  m10 m14 |
+///         | m3  m7  m11 m15 |</summary>
+///
+/// <remarks> Dx, 2018/8/8. </remarks>
+///-------------------------------------------------------------------------------------------------
+struct Matrix4
+{
+    float m[16];
+};
 
-        //左眼Projection矩阵
-        f3d::Matrix4 matProjectionL;
-        //右眼Projection矩阵
-        f3d::Matrix4 matProjectionR;
+///-------------------------------------------------------------------------------------------------
+/// <summary>
+/// 输入ModelView矩阵(或view矩阵)和Projection矩阵，同时定义了屏幕距离和屏幕的高度之后返回的计算结果.
+/// </summary>
+///
+/// <remarks> Dx, 2018/8/15. </remarks>
+///-------------------------------------------------------------------------------------------------
+struct FrustumData
+{
+    //左眼相机View矩阵
+    f3d::Matrix4 matViewL;
+    //右眼相机View矩阵
+    f3d::Matrix4 matViewR;
 
-        //笔尖的坐标，分别在设置上面相机的ModelView之后应该能够正确渲染。
-        //如左眼图像画笔首先使用上面的View矩阵设置GL_MODELVIEW：
-        // glMatrixMode(GL_MODELVIEW); 
-        // glLoadMatrixf(fd.matViewL.m);
-        // 使用这个坐标来画线即可
-        f3d::Vector3 penPosition;
-        //笔尖的方向向量
-        f3d::Vector3 penDirection;
-    };
-}
+    //左眼Projection矩阵
+    f3d::Matrix4 matProjectionL;
+    //右眼Projection矩阵
+    f3d::Matrix4 matProjectionR;
+
+    //笔尖的坐标，分别在设置上面相机的ModelView之后应该能够正确渲染。
+    //如左眼图像画笔首先使用上面的View矩阵设置GL_MODELVIEW：
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadMatrixf(fd.matViewL.m);
+    // 使用这个坐标来画线即可
+    f3d::Vector3 penPosition;
+    //笔尖的方向向量
+    f3d::Vector3 penDirection;
+};
+} // namespace f3d
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 初始化. </summary>
@@ -89,14 +92,14 @@ namespace f3d
 ///
 /// <returns> 是否初始化成功的状态,0表示成功,非0为失败. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_init(bool isStartServer = true);
+extern "C" FSCORE_EXPORT int __stdcall fmInit(bool isStartServer = true);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 关闭系统. </summary>
 ///
 /// <remarks> Xian Dai, 2017/5/7. </remarks>
 ///-------------------------------------------------------------------------------------------------
-extern "C"  FSCORE_EXPORT void __stdcall f3drm_close();
+extern "C" FSCORE_EXPORT void __stdcall fmClose();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 得到眼镜状态. </summary>
@@ -105,7 +108,7 @@ extern "C"  FSCORE_EXPORT void __stdcall f3drm_close();
 ///
 /// <returns> 返回非零表示当前系统有检测到眼镜. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getGlassStatus();
+extern "C" FSCORE_EXPORT int __stdcall fmGetGlassStatus();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 得到眼镜坐标. </summary>
@@ -114,7 +117,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getGlassStatus();
 ///
 /// <returns> 返回眼镜的坐标. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getGlassPosition();
+extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall fmGetGlassPosition();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 眼镜旋转.z轴向前 </summary>
@@ -123,7 +126,7 @@ extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getGlassPosition();
 ///
 /// <returns> 眼镜旋转的四元数. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT f3d::Quaternion __stdcall f3drm_getGlassRotation();
+extern "C" FSCORE_EXPORT f3d::Quaternion __stdcall fmGetGlassRotation();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 笔的检测状态. </summary>
@@ -132,7 +135,7 @@ extern "C" FSCORE_EXPORT f3d::Quaternion __stdcall f3drm_getGlassRotation();
 ///
 /// <returns> 返回非零表示当前系统有检测到笔. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenStatus();
+extern "C" FSCORE_EXPORT int __stdcall fmGetPenStatus();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 笔坐标，它是笔尖的坐标. </summary>
@@ -141,7 +144,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenStatus();
 ///
 /// <returns> 笔尖坐标. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getPenPosition();
+extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall fmGetPenPosition();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -153,7 +156,7 @@ extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getPenPosition();
 ///
 /// <returns> 笔的方向向量. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getPenDirection();
+extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall fmGetPenDirection();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 笔的滚转角，向右手旋转为正方向. </summary>
@@ -162,7 +165,7 @@ extern "C" FSCORE_EXPORT f3d::Vector3 __stdcall f3drm_getPenDirection();
 ///
 /// <returns> 笔的滚转角. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT float __stdcall f3drm_getPenRoll();
+extern "C" FSCORE_EXPORT float __stdcall fmGetPenRoll();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 得到笔的当前按键值状态标志,0x01中键,0x02左键,0x04右键. </summary>
@@ -171,7 +174,7 @@ extern "C" FSCORE_EXPORT float __stdcall f3drm_getPenRoll();
 ///
 /// <returns> 得到笔的按键状态. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenKey();
+extern "C" FSCORE_EXPORT int __stdcall fmGetPenKey();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -182,7 +185,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenKey();
 ///
 /// <returns> 机身的倾斜角. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT float __stdcall f3drm_getSlantAngle();
+extern "C" FSCORE_EXPORT float __stdcall fmGetSlantAngle();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -193,7 +196,7 @@ extern "C" FSCORE_EXPORT float __stdcall f3drm_getSlantAngle();
 ///
 /// <param name="mode"> (Optional) The mode. </param>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT void __stdcall f3drm_setPenShake(int mode = 1);
+extern "C" FSCORE_EXPORT void __stdcall fmSetPenShake(int mode = 1);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -206,7 +209,7 @@ extern "C" FSCORE_EXPORT void __stdcall f3drm_setPenShake(int mode = 1);
 ///
 /// <remarks> Xian Dai, 2018/1/23. </remarks>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT void __stdcall f3drm_setActiveUser();
+extern "C" FSCORE_EXPORT void __stdcall fmSetActiveUser();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -218,7 +221,7 @@ extern "C" FSCORE_EXPORT void __stdcall f3drm_setActiveUser();
 ///
 /// <param name="flag"> The flag. </param>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagVRMode(int flag);
+extern "C" FSCORE_EXPORT void __stdcall fmSetflagVRMode(int flag);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -230,7 +233,7 @@ extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagVRMode(int flag);
 ///
 /// <param name="flag"> The flag. </param>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagVRModeOther(int flag);
+extern "C" FSCORE_EXPORT void __stdcall fmSetflagVRModeOther(int flag);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -241,7 +244,7 @@ extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagVRModeOther(int flag);
 ///
 /// <param name="flag"> The flag. </param>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagDualScreenMode(int flag);
+extern "C" FSCORE_EXPORT void __stdcall fmSetflagDualScreenMode(int flag);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -252,7 +255,7 @@ extern "C" FSCORE_EXPORT void __stdcall f3drm_setflagDualScreenMode(int flag);
 ///
 /// <param name="flag"> The flag. </param>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getCurDualScreenStatus();
+extern "C" FSCORE_EXPORT int __stdcall fmGetCurDualScreenStatus();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 一体机检测程序是否在睡眠状态,0为正常检查,大于0为睡眠状态. </summary>
@@ -261,7 +264,16 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getCurDualScreenStatus();
 ///
 /// <returns> The is sleep. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getIsSleep();
+extern "C" FSCORE_EXPORT int __stdcall fmGetIsSleep();
+
+///-------------------------------------------------------------------------------------------------
+/// <summary> 一体机检测程序的工作状态:0表示已经关闭; 1表示正在工作; 2表示正在低开销休眠. </summary>
+///
+/// <remarks> Xian Dai, 2018/1/23. </remarks>
+///
+/// <returns> 当前的工作状态标记. </returns>
+///-------------------------------------------------------------------------------------------------
+extern "C" FSCORE_EXPORT int __stdcall fmGetWorkStatus();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 当前一体机检测程序的工作帧率. </summary>
@@ -270,7 +282,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getIsSleep();
 ///
 /// <returns> The FPS. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT float __stdcall f3drm_getFps();
+extern "C" FSCORE_EXPORT float __stdcall fmGetFps();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 获取摄像头硬件错误标志. </summary>
@@ -279,7 +291,7 @@ extern "C" FSCORE_EXPORT float __stdcall f3drm_getFps();
 ///
 /// <returns> 摄像头硬件错误标志 . </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getCameraDevErrorCode();
+extern "C" FSCORE_EXPORT int __stdcall fmGetCameraDevErrorCode();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 获取笔硬件错误标志. </summary>
@@ -288,7 +300,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getCameraDevErrorCode();
 ///
 /// <returns> 笔硬件错误标志. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenDevErrorCode();
+extern "C" FSCORE_EXPORT int __stdcall fmGetPenDevErrorCode();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 获取主控板硬件错误标志. </summary>
@@ -297,7 +309,16 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getPenDevErrorCode();
 ///
 /// <returns> 主控板硬件错误标志. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getMCDevErrorCode();
+extern "C" FSCORE_EXPORT int __stdcall fmGetMCDevErrorCode();
+
+///-------------------------------------------------------------------------------------------------
+/// <summary> 得到软件是否发生了错误的标志. </summary>
+///
+/// <remarks> Dx, 2018/10/30. </remarks>
+///
+/// <returns> 处理软件自己发生了错误的标志. </returns>
+///-------------------------------------------------------------------------------------------------
+extern "C" FSCORE_EXPORT int __stdcall fmGetProcErrorCode();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 获取主控板硬件id号. </summary>
@@ -306,7 +327,7 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getMCDevErrorCode();
 ///
 /// <returns> 主控板硬件id号. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getMCDevID();
+extern "C" FSCORE_EXPORT int __stdcall fmGetMCDevID();
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary> 得到当前视锥的左眼和右眼两个投影矩阵. </summary>
@@ -324,8 +345,8 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getMCDevID();
 ///
 /// <returns> Error code. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
-extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR2(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
+extern "C" FSCORE_EXPORT int __stdcall fmGetFrustumLR(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
+extern "C" FSCORE_EXPORT int __stdcall fmGetFrustumLR2(f3d::Matrix4* matL, f3d::Matrix4* matR, float disNear, float disFar, float pupilDistance = 0.066, float aspectRatio = 16 / 9.0f);
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>
@@ -344,7 +365,12 @@ extern "C" FSCORE_EXPORT int __stdcall f3drm_getFrustumLR2(f3d::Matrix4* matL, f
 ///
 /// <returns> Error Code. </returns>
 ///-------------------------------------------------------------------------------------------------
-extern "C" FSCORE_EXPORT int __stdcall f3drm_modifyFrustum(f3d::FrustumData * frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
-    float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded);
+extern "C" FSCORE_EXPORT int __stdcall fmModifyFrustum(f3d::FrustumData* frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
+                                                       float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded);
 
-extern "C"  FSCORE_EXPORT void __stdcall matFun6(f3d::Matrix4* w2c, float* screen4Point, f3d::Matrix4 *result);
+extern "C" FSCORE_EXPORT int __stdcall fmModifyFrustumDebug2(f3d::FrustumData* frustumData, f3d::Matrix4* matView, f3d::Matrix4* matProjection,
+                                                             float screenDistance, float screenHeight, float pupilDistance, bool isLeftHanded,
+                                                             int kProjX, int kProjY, int kProjZ,
+                                                             int kPenX, int kPenY, int kPenZ);
+
+#endif
