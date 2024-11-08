@@ -24,7 +24,7 @@ using namespace Win;
 // default contructor
 ///////////////////////////////////////////////////////////////////////////////
 ControllerGL::ControllerGL(ModelGL* model, ViewGL* view) : model(model), view(view),
-                                                           loopFlag(false)
+loopFlag(false)
 {
 }
 
@@ -52,7 +52,7 @@ int ControllerGL::close()
 int ControllerGL::create()
 {
     // create a OpenGL rendering context
-    if(view->createContext(handle, 32, 24, 8, 8))
+    if (view->createContext(handle, 32, 24, 8, 8))
     {
         Win::log(L"Created OpenGL rendering context.");
     }
@@ -104,7 +104,7 @@ void ControllerGL::runThread()
     Win::log(L"Initialized OpenGL states.");
 
     bool result = model->initShaders();
-    if(result)
+    if (result)
         Win::log("GLSL shader objects are initialized.");
     else
         Win::log("[ERROR] Failed to initialize GLSL.");
@@ -117,10 +117,10 @@ void ControllerGL::runThread()
 
     // rendering loop
     Win::log(L"Entering OpenGL rendering thread...");
-    while(loopFlag)
+    while (loopFlag)
     {
-        //std::this_thread::yield();      // yield to other processes or threads
-        std::this_thread::sleep_for(std::chrono::milliseconds(30)); // yield to other processes or threads
+        std::this_thread::yield();      // yield to other processes or threads
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1)); // yield to other processes or threads
         model->draw();
         view->swapBuffers();
     }
@@ -195,11 +195,11 @@ int ControllerGL::rButtonUp(WPARAM state, int x, int y)
 ///////////////////////////////////////////////////////////////////////////////
 int ControllerGL::mouseMove(WPARAM state, int x, int y)
 {
-    if(state == MK_LBUTTON)
+    if (state == MK_LBUTTON)
     {
         model->rotateCamera(x, y);
     }
-    if(state == MK_RBUTTON)
+    if (state == MK_RBUTTON)
     {
         model->zoomCamera(y);
     }
